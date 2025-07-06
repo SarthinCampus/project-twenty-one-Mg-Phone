@@ -1,0 +1,74 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: testing "john.doe@example.com"
+      id: testing-john-doe-example-com
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: testing "john.doe@example.com"
+        setup-command: ''
+        command: python3 regex_email_validation/main.py
+        input: john.doe@example.com
+        expected-output: Valid
+        comparison-method: contains
+        timeout: 10
+        max-score: 1
+    - name: testing "wrong-email@com"
+      id: testing-wrong-email-com
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: testing "wrong-email@com"
+        setup-command: ''
+        command: python3 regex_email_validation/main.py
+        input: 'wrong-email@com
+
+          '
+        expected-output: Invalid
+        comparison-method: contains
+        timeout: 10
+        max-score: 1
+    - name: testing "sarthin@edu.org"
+      id: testing-sarthin-edu-org
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: testing "sarthin@edu.org"
+        setup-command: ''
+        command: python3 regex_email_validation/main.py
+        input: sarthin@edu.org
+        expected-output: Valid
+        comparison-method: contains
+        timeout: 10
+        max-score: 2
+    - name: testing "@gmail.com"
+      id: testing-gmail-com
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: testing "@gmail.com"
+        setup-command: ''
+        command: python3 regex_email_validation/main.py
+        input: "@gmail.com"
+        expected-output: Invalid
+        comparison-method: contains
+        timeout: 10
+        max-score: 1
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TESTING-JOHN-DOE-EXAMPLE-COM_RESULTS: "${{steps.testing-john-doe-example-com.outputs.result}}"
+        TESTING-WRONG-EMAIL-COM_RESULTS: "${{steps.testing-wrong-email-com.outputs.result}}"
+        TESTING-SARTHIN-EDU-ORG_RESULTS: "${{steps.testing-sarthin-edu-org.outputs.result}}"
+        TESTING-GMAIL-COM_RESULTS: "${{steps.testing-gmail-com.outputs.result}}"
+      with:
+        runners: testing-john-doe-example-com,testing-wrong-email-com,testing-sarthin-edu-org,testing-gmail-com
